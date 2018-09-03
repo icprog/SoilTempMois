@@ -38,8 +38,6 @@
 /* USER CODE BEGIN 0 */
 #include "usart.h"
 
-extern uint16_t RX_NUM;
-
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
@@ -167,24 +165,24 @@ void AES_RNG_LPUART1_IRQHandler(void)
   HAL_UART_IRQHandler(&hlpuart1);
   /* USER CODE BEGIN AES_RNG_LPUART1_IRQn 1 */
 	uint8_t tmp1,tmp2;
-	tmp1 = __HAL_UART_GET_FLAG(&hlpuart1, UART_FLAG_IDLE);   //空闲中断中将已收字节数取出后，停止DMA
-  tmp2 = __HAL_UART_GET_IT_SOURCE(&hlpuart1, UART_IT_IDLE);
-	
-	if((tmp1 != RESET) && (tmp2 != RESET))
-	{ 
-		__HAL_UART_CLEAR_IDLEFLAG(&hlpuart1);
+		tmp1 = __HAL_UART_GET_FLAG(&hlpuart1, UART_FLAG_IDLE);   //空闲中断中将已收字节数取出后，停止DMA
+		tmp2 = __HAL_UART_GET_IT_SOURCE(&hlpuart1, UART_IT_IDLE);
+		
+		if((tmp1 != RESET) && (tmp2 != RESET))
+		{ 
+			__HAL_UART_CLEAR_IDLEFLAG(&hlpuart1);
 
 
-		__HAL_DMA_DISABLE(&hdma_lpuart1_rx);
+			__HAL_DMA_DISABLE(&hdma_lpuart1_rx);
 
-		RX_NUM=(MAXSIZE)-(hdma_lpuart1_rx.Instance->CNDTR);
+			UART_RX_LPUART1.USART_RX_Len=(MAXSIZE)-(hdma_lpuart1_rx.Instance->CNDTR);
 
-		__HAL_DMA_SET_COUNTER(&hdma_lpuart1_rx,MAXSIZE);
-		__HAL_DMA_ENABLE(&hdma_lpuart1_rx);
-		hlpuart1.gState = HAL_UART_STATE_READY;
-		HAL_UART_Receive_DMA(&hlpuart1,UART_RX_LPUART1.USART_RX_BUF,MAXSIZE);      
-
-	}
+			__HAL_DMA_SET_COUNTER(&hdma_lpuart1_rx,MAXSIZE);
+			__HAL_DMA_ENABLE(&hdma_lpuart1_rx);
+			hlpuart1.gState = HAL_UART_STATE_READY;
+			HAL_UART_Receive_DMA(&hlpuart1,UART_RX_LPUART1.USART_RX_BUF,MAXSIZE);      
+			UART_RX_LPUART1.Rx_State = true;
+		}
   /* USER CODE END AES_RNG_LPUART1_IRQn 1 */
 }
 

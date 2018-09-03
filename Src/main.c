@@ -45,6 +45,7 @@
 #include "gpio.h"
 
 /* USER CODE BEGIN Includes */
+#include <string.h>
 
 #include "userapp.h"
 
@@ -68,7 +69,6 @@ static void MX_NVIC_Init(void);
 
 /* USER CODE BEGIN 0 */
 
-uint16_t RX_NUM = 0;
 
 /* USER CODE END 0 */
 
@@ -110,7 +110,9 @@ int main(void)
 	HAL_UART_Receive_DMA(&hlpuart1,UART_RX_LPUART1.USART_RX_BUF,MAXSIZE);      
 	__HAL_UART_ENABLE_IT(&hlpuart1,UART_IT_IDLE);
 	
-	RS485_TO_RX(  );
+	RS485_TO_TX(  );
+	
+	printf("helloworld\r\n");
 	
   /* USER CODE END 2 */
 
@@ -133,13 +135,13 @@ int main(void)
 				
 		uint16_t temp = VREFINT_CAL_VREF * adc_data[0];
 		
-		if(RX_NUM)
+		if(UART_RX_LPUART1.USART_RX_Len)
 		{
 			RS485_TO_TX(  );
 			
-			printf("RX_NUM = %d  data = %s\r\n",RX_NUM, UART_RX_LPUART1.USART_RX_BUF); //把接收到的字节再发送到串口1
+			printf("RX_NUM = %d  data = %s\r\n",UART_RX_LPUART1.USART_RX_Len, UART_RX_LPUART1.USART_RX_BUF); //把接收到的字节再发送到串口1
 			
-			memset(UART_RX_LPUART1.USART_RX_BUF, 0, RX_NUM);
+			memset(UART_RX_LPUART1.USART_RX_BUF, 0, UART_RX_LPUART1.USART_RX_Len);
 			
 			printf("VREFINT_CAL = %d 内部采样 = %d, 外部基准 = %d 温度 = %d 湿度 = %d\r\n",adc_data[0], adc_data[1],adc_data[2],adc_data[3],adc_data[4]);
 			
@@ -149,7 +151,7 @@ int main(void)
 		
 			printf("湿度 = %.4f \r\n", (float)(temp*adc_data[4])/(adc_data[1] * VFULL));
 			
-			RX_NUM=0;
+			UART_RX_LPUART1.USART_RX_Len=0;
 			RS485_TO_RX(  );
 		}
 		HAL_Delay(2000);

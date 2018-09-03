@@ -68,6 +68,7 @@ PUTCHAR_PROTOTYPE
 
 UART_RX UART_RX_LPUART1 = {0, {0}, 0, {0}, false, false};
 
+
 /* USER CODE END 0 */
 
 UART_HandleTypeDef hlpuart1;
@@ -175,15 +176,16 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
 	if(huart->Instance==LPUART1) ///Rs485
 	{
+		
+#if 0
 		UART_RX_LPUART1.USART_RX_BUF[UART_RX_LPUART1.USART_RX_Len]=UART_RX_LPUART1.aRxBuffer[0];	
 		printf("%02x ",UART_RX_LPUART1.USART_RX_BUF[UART_RX_LPUART1.USART_RX_Len]);	
 		UART_RX_LPUART1.USART_RX_Len++;
 		
 		UART_RX_LPUART1.Rxtime = HAL_GetTick(  );
 		UART_RX_LPUART1.Rx_State = true;
-	
-	 if(UART_RX_LPUART1.USART_RX_Len >= 516)
-			UART_RX_LPUART1.USART_RX_Len = 0;
+#endif
+
 	}	
 }
 
