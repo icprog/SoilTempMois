@@ -167,6 +167,8 @@ void AES_RNG_LPUART1_IRQHandler(void)
 	uint8_t tmp1,tmp2;
 		tmp1 = __HAL_UART_GET_FLAG(&hlpuart1, UART_FLAG_IDLE);   //空闲中断中将已收字节数取出后，停止DMA
 		tmp2 = __HAL_UART_GET_IT_SOURCE(&hlpuart1, UART_IT_IDLE);
+	
+	printf("Irq\r\n");
 		
 		if((tmp1 != RESET) && (tmp2 != RESET))
 		{ 

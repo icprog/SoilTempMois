@@ -69,6 +69,7 @@ static void MX_NVIC_Init(void);
 
 /* USER CODE BEGIN 0 */
 
+#define 	USEEXTVREF		1
 
 /* USER CODE END 0 */
 
@@ -110,10 +111,8 @@ int main(void)
 	HAL_UART_Receive_DMA(&hlpuart1,UART_RX_LPUART1.USART_RX_BUF,MAXSIZE);      
 	__HAL_UART_ENABLE_IT(&hlpuart1,UART_IT_IDLE);
 	
-	RS485_TO_TX(  );
-	
-	printf("helloworld\r\n");
-	
+	RS485_TO_RX(  );
+		
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -124,14 +123,13 @@ int main(void)
 
   /* USER CODE BEGIN 3 */
 		
+#if USEEXTVREF	
 		
 		adc_data[0] = (*VREFINT_CAL_ADDR); ///内部基准
-	  adc_data[1] = GetAdcData(ADC_CHANNEL_VREFINT, 1); //内部采样
-		adc_data[2] = GetAdcData(ADC_CHANNEL_7, 1);  ///外部基准
-		
-		adc_data[3] = GetAdcData(ADC_CHANNEL_6, 1); ///温度
-		
-		adc_data[4] = GetAdcData(ADC_CHANNEL_5, 1); ///湿度
+	  adc_data[1] = GetAdcData(ADC_CHANNEL_VREFINT, BUFLEN); //内部采样		
+		adc_data[2] = GetAdcData(ADC_CHANNEL_7, BUFLEN);  ///外部基准
+		adc_data[3] = GetAdcData(ADC_CHANNEL_6, BUFLEN); ///温度
+		adc_data[4] = GetAdcData(ADC_CHANNEL_5, BUFLEN); ///湿度
 				
 		uint16_t temp = VREFINT_CAL_VREF * adc_data[0];
 		
@@ -152,8 +150,18 @@ int main(void)
 			printf("湿度 = %.4f \r\n", (float)(temp*adc_data[4])/(adc_data[1] * VFULL));
 			
 			UART_RX_LPUART1.USART_RX_Len=0;
+			
+//			Rs485Handler(  );
 			RS485_TO_RX(  );
 		}
+
+#else
+
+		
+		
+#endif 
+
+		
 		HAL_Delay(2000);
 
   }
@@ -229,7 +237,7 @@ static void MX_NVIC_Init(void)
   HAL_NVIC_SetPriority(DMA1_Channel2_3_IRQn, 1, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel2_3_IRQn);
   /* AES_RNG_LPUART1_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(AES_RNG_LPUART1_IRQn, 0, 0);
+  HAL_NVIC_SetPriority(AES_RNG_LPUART1_IRQn, 2, 0);
   HAL_NVIC_EnableIRQ(AES_RNG_LPUART1_IRQn);
 }
 

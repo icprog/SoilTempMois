@@ -66,7 +66,7 @@ void MX_ADC_Init(void)
   hadc.Init.SamplingTime = ADC_SAMPLETIME_79CYCLES_5;
   hadc.Init.ScanConvMode = ADC_SCAN_DIRECTION_FORWARD;
   hadc.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc.Init.ContinuousConvMode = DISABLE;
+  hadc.Init.ContinuousConvMode = ENABLE;
   hadc.Init.DiscontinuousConvMode = DISABLE;
   hadc.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
   hadc.Init.ExternalTrigConv = ADC_SOFTWARE_START;
@@ -223,7 +223,7 @@ uint16_t GetAdcData(uint32_t Channel, uint8_t Counter)
 	
 	HAL_ADC_Start_DMA(&hadc,Getadc.Buf,Counter);
 	
-	HAL_Delay(50);
+	HAL_Delay(100);
 
 	HAL_ADC_Stop_DMA(&hadc);
 	/**É¾³ý½Úµã
@@ -247,7 +247,7 @@ void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
 //		printf("data[%d] = %d\r\n",i,Getadc.Buf[i]);
 		data += Getadc.Buf[i];
 //		HAL_Delay(1);
-//		NOPHandler(  );
+		NOPHandler(  );
 	}
 	Getadc.Data = data/BUFLEN;
 //	printf("ADC = %d\r\n",Getadc.Data);

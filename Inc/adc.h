@@ -65,7 +65,7 @@ extern ADC_HandleTypeDef hadc;
 
 /* USER CODE BEGIN Private defines */
 
-#define BUFLEN		1
+#define BUFLEN		10
 
 typedef struct u_adc
 {
