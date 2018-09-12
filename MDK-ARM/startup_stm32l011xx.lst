@@ -399,13 +399,12 @@ ARM Macro Assembler    Page 7
               00000000 
               00000000 
               00000000 
-Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M0+ --apcs=inter
-work --depend=temp\startup_stm32l011xx.d -otemp\startup_stm32l011xx.o -IE:\NBIÏ
-îÄ¿\NBI_LoRa\NBI_LoRa´úÂë\ÍÁÈÀÎÂÊª¶È\NBISoilTW\Temp\Temp\MDK-ARM\RTE -ID:\mysaf
-tware\keil_5.12\ARM\PACK\ARM\CMSIS\4.5.0\CMSIS\Include -ID:\mysaftware\keil_5.1
-2\ARM\PACK\Keil\STM32L0xx_DFP\1.6.0\Device\Include --predefine="__MICROLIB SETA
- 1" --predefine="__UVISION_VERSION SETA 518" --predefine="_RTE_ SETA 1" --prede
-fine="STM32L011xx SETA 1" --list=startup_stm32l011xx.lst startup_stm32l011xx.s
+Command Line: --debug --xref --cpu=Cortex-M0+ --apcs=interwork --depend=temp\st
+artup_stm32l011xx.d -otemp\startup_stm32l011xx.o -IE:\NBIÏîÄ¿\NBI_LoRa\NBI_LoRa
+´úÂë\ÍÁÈÀÎÂÊª¶È\NBISoilTW\SoilTempMois\SoilTempMois\MDK-ARM\RTE -ID:\mysaftware
+\keil_5.12\ARM\PACK\ARM\CMSIS\4.2.0\CMSIS\Include --predefine="__MICROLIB SETA 
+1" --predefine="_RTE_ SETA 1" --list=startup_stm32l011xx.lst startup_stm32l011x
+x.s
 
 
 
@@ -845,4 +844,4 @@ Symbol: __main
       At line 166 in file startup_stm32l011xx.s
 Comment: __main used once
 2 symbols
-379 symbols in table
+377 symbols in table

@@ -53,6 +53,9 @@
 #define VREFINT_CAL_VREF                   							((uint32_t) 3U)                    /* Analog voltage reference (Vref+) value with which temperature sensor has been calibrated in production (tolerance: +-10 mV) (unit: mV). */
 #define VDD_APPLI                      		 							((uint32_t) 1220U)    /* Value of analog voltage supply Vdda (unit: mV) */
 #define VFULL																						((uint32_t) 4095U)
+	 
+#define VREFEXT_CAL_VREF                   							((float)2.5)                    /* Analog voltage reference (Vref+) value with which temperature sensor has been calibrated in production (tolerance: +-10 mV) (unit: mV). */
+	 
 
 #define TEMP130_CAL_ADDR 																((uint16_t*) ((uint32_t) 0x1FF8007E))
 #define TEMP30_CAL_ADDR 																((uint16_t*) ((uint32_t) 0x1FF8007A))

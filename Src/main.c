@@ -69,7 +69,15 @@ static void MX_NVIC_Init(void);
 
 /* USER CODE BEGIN 0 */
 
-#define 	USEEXTVREF		1
+#define 	USEINTVREF		0
+
+/***********采集数据经过处理，放大10倍*************/
+uint16_t Rs485DataBuf[2] = {0};
+
+/***********采集数据电压:MV*************/
+uint16_t Rs485RefBuf[2]  = {0};
+
+void Delay(uint32_t Delay);
 
 /* USER CODE END 0 */
 
@@ -78,6 +86,9 @@ int main(void)
 
   /* USER CODE BEGIN 1 */
 	uint16_t adc_data[5] = {0};
+	float    Adcdata = 0;
+	uint32_t Vchannel = 0;
+
 
   /* USER CODE END 1 */
 
@@ -111,7 +122,7 @@ int main(void)
 	HAL_UART_Receive_DMA(&hlpuart1,UART_RX_LPUART1.USART_RX_BUF,MAXSIZE);      
 	__HAL_UART_ENABLE_IT(&hlpuart1,UART_IT_IDLE);
 	
-	RS485_TO_RX(  );
+	Rs485Init(  );
 		
   /* USER CODE END 2 */
 
@@ -123,14 +134,14 @@ int main(void)
 
   /* USER CODE BEGIN 3 */
 		
-#if USEEXTVREF	
-		
-		adc_data[0] = (*VREFINT_CAL_ADDR); ///内部基准
 	  adc_data[1] = GetAdcData(ADC_CHANNEL_VREFINT, BUFLEN); //内部采样		
 		adc_data[2] = GetAdcData(ADC_CHANNEL_7, BUFLEN);  ///外部基准
 		adc_data[3] = GetAdcData(ADC_CHANNEL_6, BUFLEN); ///温度
 		adc_data[4] = GetAdcData(ADC_CHANNEL_5, BUFLEN); ///湿度
+		
+#if USEEXTVREF		
 				
+		adc_data[0] = (*VREFINT_CAL_ADDR); ///内部基准
 		uint16_t temp = VREFINT_CAL_VREF * adc_data[0];
 		
 		if(UART_RX_LPUART1.USART_RX_Len)
@@ -151,18 +162,55 @@ int main(void)
 			
 			UART_RX_LPUART1.USART_RX_Len=0;
 			
-//			Rs485Handler(  );
+			Rs485Handler(  );
 			RS485_TO_RX(  );
 		}
 
 #else
 
+//			if(UART_RX_LPUART1.USART_RX_Len)
+		{
+			RS485_TO_TX(  );
+			
+//			printf("RX_NUM = %d  data = %s\r\n",UART_RX_LPUART1.USART_RX_Len, UART_RX_LPUART1.USART_RX_BUF); //把接收到的字节再发送到串口1
+			
+			Vchannel = VFULL * adc_data[1] * VREFEXT_CAL_VREF;
+			
+			Adcdata = (VREFINT_CAL_VREF * adc_data[2]);
+						
+//			printf("Vchannel = %d 内部采样 = %d, 外部基准 = %d Adcdata %.2f\r\n",Vchannel, adc_data[1],adc_data[2],Adcdata);
+			
+			Adcdata = (float)(Vchannel/Adcdata);
+			
+			printf("VREFINT_CAL = %.2f 内部采样 = %d, 外部基准 = %d 温度 = %d 湿度 = %d\r\n",Adcdata, adc_data[1],adc_data[2],adc_data[3],adc_data[4]);
+			
+			float temp = VREFINT_CAL_VREF * Adcdata;
+			
+			///采集电压：
+			Rs485RefBuf[0] = (temp*adc_data[3])/(adc_data[1] * VFULL) * 1000;  
+			Rs485RefBuf[1] = (temp*adc_data[4])/(adc_data[1] * VFULL) * 1000;  
+
+			
+			///放大10倍
+			Rs485DataBuf[0] = (temp*adc_data[3])/(adc_data[1] * VFULL) * 1000;
+			
+			///湿度处理待定
+			
+			printf("外部基准 = %.4f \r\n", (float)(temp*adc_data[2])/(adc_data[1] * VFULL));
 		
+			printf("温度 = %.2f°C\r\n", (float)(temp*adc_data[3])/(adc_data[1] * VFULL) * 100);
 		
-#endif 
+			printf("湿度 = %.4f \r\n", (float)(temp*adc_data[4])/(adc_data[1] * VFULL));
+						
+//			Rs485RevceHandle(  );
+//			
+//			RS485_TO_RX(  );
+		}
 
 		
-		HAL_Delay(2000);
+#endif 
+		
+		Delay(2000);
 
   }
   /* USER CODE END 3 */
@@ -242,6 +290,16 @@ static void MX_NVIC_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+void Delay(uint32_t Delay)
+{
+	uint32_t tickstart = 0U;
+  tickstart = HAL_GetTick();
+  while((HAL_GetTick() - tickstart) < Delay)
+  {
+		__WFI();
+  }
+}
 
 /* USER CODE END 4 */
 

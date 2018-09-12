@@ -14,8 +14,6 @@
 	 
 	 
 void Rs485Init(void);
-
-void Rs485Handler(void);	 
 	
 void Rs485RevceHandle(void);	 
 

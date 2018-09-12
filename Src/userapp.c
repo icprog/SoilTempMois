@@ -17,42 +17,46 @@ void Rs485Init(void)
 }
 
 /*
-*Rs485Handler： Rs485数据处理
-*参数：  			  无
-*返回值：			  无
-*/
-void Rs485Handler(void)
-{
-	if(UART_RX_LPUART1.Rx_State  && (HAL_GetTick(  ) - UART_RX_LPUART1.Rxtime > 50))
-	{
-		UART_RX_LPUART1.Rx_State = false;
-		Rs485RevceHandle(  );
-	}
-	else
-		__WFI();
-}
-
-/*
-*Rs485RevceHandle： 初始化485
+*Rs485RevceHandle： Rs485数据处理
 *参数：  			 			无
 *返回值：			 			无
 */
 void Rs485RevceHandle(void)
 {
+	uint8_t temp[15] = {0};
+	uint8_t len = 0;
+	
+	printf("UART_RX_LPUART1.USART_RX_Len = %d\r\n",UART_RX_LPUART1.USART_RX_Len);
+	
 	if(CalcCRC16(UART_RX_LPUART1.USART_RX_BUF,UART_RX_LPUART1.USART_RX_Len) == 0)
 	{		
 		///判断Rs485功能码
 		switch(UART_RX_LPUART1.USART_RX_BUF[1])
 		{
 			case 0x03:  ///1：广播处理 0xfe	0x03	0x04	0x00	0x00	0x00	0x00	0xf5	0x3c
-					if(UART_RX_LPUART1.USART_RX_BUF[0] == 0xFE)
+					if(UART_RX_LPUART1.USART_RX_BUF[0] == 0xFE && UART_RX_LPUART1.USART_RX_Len == 0x09)
 					{
 						///0xfe	0x03	0x04	Rs485Addr	0x00	0x00	0x00	0xf4	0x84
-							RS485_TO_TX(  );
-
+						
+						temp[len++] = 0xfe;
+						temp[len++] = 0x03;
+						temp[len++] = 0x04;
+					
+						temp[len++] = Rs485Addr;
+						temp[len++] = 0x00;
+						temp[len++] = 0x00;
+						temp[len++] = 0x00;
+					
+						CalcCRC16(temp,len);
+					
+						RS485_TO_TX(  );
+						
+						HAL_UART_Transmit(&hlpuart1, temp, (len+2),0xFFFF);	
 					}
 					else if(UART_RX_LPUART1.USART_RX_BUF[0] == Rs485Addr) ///2：获取数据指令：温度、湿度
 					{
+						///rev: 0x02	0x03	0x00	0x00	0x00	0x02	0xc4	0x38
+						
 						///0x02	0x03	0x04	0xff	0xdd	0x01	0x64	0x69	0x66 (温度、湿度)
 					}
 			
@@ -60,14 +64,23 @@ void Rs485RevceHandle(void)
 			
 			
 			case 0xA5: ///3：直接输出电压
+			
+					///rev: 0xA5	0x03	0x00	0x00	0x00	0x02	0xc4	0x38
+			
 				break;
 			
 			case 0x06: ///修改地址
-				if(UART_RX_LPUART1.USART_RX_BUF[0] == Rs485Addr)	
+				if(UART_RX_LPUART1.USART_RX_BUF[0] == Rs485Addr && UART_RX_LPUART1.USART_RX_Len == 0x09)	
 				{
 					///Rs485Addr	0x06	0x04	0x00	0x00	0x00	new	0x7b	0xa7
 					
+					memcpy(temp, UART_RX_LPUART1.USART_RX_BUF, UART_RX_LPUART1.USART_RX_Len);
+					
+					HAL_UART_Transmit(&hlpuart1, temp, UART_RX_LPUART1.USART_RX_Len,0xFFFF);	
+					
 					///Rs485Addr = new
+					
+					Rs485Addr = temp[6];
 				}
 			
 				break;
